@@ -11,7 +11,7 @@ class PriceListingSerializer(serializers.ModelSerializer):
     PRODUCT = ProductListingSerializer(read_only=True)
     class Meta:
         model = models.PriceListing
-        fields = ['id', 'DISTRIBUTOR', 'PRODUCT', 'price_per_metric_ton', 'quantity_available_mt', 'created_at', 'updated_at']  
+        fields = ['id', 'DISTRIBUTOR', 'PRODUCT', 'price_per_metric_ton', 'quantity_available_mt', 'created_at', 'updated_at', 'is_available']  
 
     def get_DISTRIBUTOR(self, obj):
         return obj.DISTRIBUTOR.shop_name or obj.DISTRIBUTOR.username  
