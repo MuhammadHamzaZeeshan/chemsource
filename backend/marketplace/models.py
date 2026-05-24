@@ -23,14 +23,14 @@ class ProductListing(models.Model):
         ("ACID_BASE", "Acid Base")
     )
     CHEMICAL_NAME = models.CharField(max_length=100, unique=True, null=False, blank=False)
-    CATEGORY = models.CharField(max_length=100, choices=CATEGORIES,unique=True, null=False, blank=False)
+    CATEGORY = models.CharField(max_length=100, choices=CATEGORIES, null=False, blank=False)
     CAS_NUMBER = models.CharField(max_length=50, unique=True, null=False, blank=False)
 
     def __str__(self):
         return f"{self.CAS_NUMBER} - {self.CHEMICAL_NAME}"
     
 class PriceListing(models.Model):
-    DISTRIBUTOR = models.ForeignKey(CustomUser, limit_choices_to={'role':'DISTRIBUTOR'}, on_delete=models.CASCADE, related_name='listings')
+    DISTRIBUTOR = models.ForeignKey(CustomUser, limit_choices_to={'CATEGORY': 'DISTRIBUTOR'}, on_delete=models.CASCADE, related_name='listings')
     PRODUCT = models.ForeignKey(ProductListing, on_delete=models.CASCADE, related_name='listings')
     price_per_metric_ton = models.DecimalField(max_digits=10, decimal_places=2)
     quantity_available_mt = models.PositiveIntegerField()
@@ -42,7 +42,7 @@ class PriceListing(models.Model):
         unique_together = ('DISTRIBUTOR', 'PRODUCT')
 
     def __str__(self):
-        return f"{(self.DISTRIBUTOR.SHOP_NAME)} - {self.CHEMICAL_NAME}"
+        return f"{self.DISTRIBUTOR.SHOP_NAME} - {self.PRODUCT.CHEMICAL_NAME}"
     
 class ProcurementOrder(models.Model):
     ProcurementOrder = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
