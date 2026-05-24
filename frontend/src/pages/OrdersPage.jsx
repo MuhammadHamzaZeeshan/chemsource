@@ -1,59 +1,57 @@
 import { useEffect, useState } from "react";
 import { fetchOrders } from "../api";
-import { LoadingSpinner, ErrorBanner, EmptyState, Badge } from "../components/UI";
+import { LoadingSpinner, ErrorBanner, EmptyState, PageHeader } from "../components/UI";
+
+function formatDateTime(dateStr) {
+  const d = new Date(dateStr);
+  const date = d.toLocaleDateString("en-PK", { year: "numeric", month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString("en-PK", { hour: "numeric", minute: "2-digit", hour12: true });
+  return { date, time };
+}
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
+  const [error, setError]     = useState(null);
+  const [search, setSearch]   = useState("");
 
   useEffect(() => {
     fetchOrders()
-      .then((data) => {
-        // Handle both array and single object responses
-        setOrders(Array.isArray(data) ? data : data ? [data] : []);
-      })
+      .then((data) => setOrders(Array.isArray(data) ? data : data ? [data] : []))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
   const filtered = orders.filter((o) =>
-    String(o.id).includes(search) ||
-    String(o.listing).includes(search)
+    String(o.id).includes(search) || String(o.listing).includes(search)
   );
 
   const totalValue = filtered.reduce((sum, o) => sum + parseFloat(o.total_invoice || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium mb-2">
-          <span>◎</span> Procurement
-        </div>
-        <h1 className="text-3xl font-black text-white mb-1">Orders</h1>
-        <p className="text-slate-400 text-sm">
-          Track all procurement orders, quantities, and invoices.
-        </p>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <PageHeader
+        label="Procurement"
+        title="Orders"
+        desc="All procurement orders with quantities and auto-calculated invoices."
+      />
 
-      {/* Summary cards */}
+      {/* Summary */}
       {!loading && !error && orders.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-            <p className="text-slate-500 text-xs mb-1">Total Orders</p>
-            <p className="text-white text-3xl font-black">{orders.length}</p>
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-xs text-gray-500 mb-1">Total Orders</p>
+            <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
           </div>
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
-            <p className="text-slate-500 text-xs mb-1">Total Invoice Value</p>
-            <p className="text-emerald-400 text-2xl font-black">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-xs text-gray-500 mb-1">Total Invoice Value</p>
+            <p className="text-xl font-bold text-gray-900">
               PKR {totalValue.toLocaleString("en-PK", { minimumFractionDigits: 2 })}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-            <p className="text-slate-500 text-xs mb-1">Avg Order Value</p>
-            <p className="text-cyan-400 text-2xl font-black">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <p className="text-xs text-gray-500 mb-1">Average Order Value</p>
+            <p className="text-xl font-bold text-gray-900">
               PKR {orders.length ? (totalValue / orders.length).toLocaleString("en-PK", { maximumFractionDigits: 0 }) : "0"}
             </p>
           </div>
@@ -61,80 +59,56 @@ export default function OrdersPage() {
       )}
 
       {/* Search */}
-      <div className="relative mb-6">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">⌕</span>
+      <div className="mb-5">
         <input
           type="text"
-          placeholder="Search by order ID or listing ID…"
+          placeholder="Search by order ID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+          className="w-full sm:w-80 px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
-      {loading && <LoadingSpinner message="Fetching orders…" />}
-      {error && <ErrorBanner message={error} />}
+      {loading && <LoadingSpinner message="Loading orders..." />}
+      {error   && <ErrorBanner message={error} />}
       {!loading && !error && filtered.length === 0 && (
-        <EmptyState icon="◎" title="No orders found" desc="Orders placed through the listings page will appear here." />
+        <EmptyState title="No orders found" desc="Orders placed from the listings page will appear here." />
       )}
 
       {!loading && !error && filtered.length > 0 && (
-        <div className="rounded-2xl border border-slate-800 overflow-hidden">
-          {/* Table header */}
-          <div className="hidden sm:grid grid-cols-5 gap-4 px-5 py-3 bg-slate-900/80 border-b border-slate-800 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            <span>Order ID</span>
-            <span>Listing</span>
-            <span>Quantity</span>
-            <span>Invoice (PKR)</span>
-            <span>Date</span>
+        <>
+          <p className="text-xs text-gray-400 mb-3">{filtered.length} order{filtered.length !== 1 ? "s" : ""}</p>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Order ID</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Invoice (PKR)</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date & Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((o) => {
+                  const { date, time } = formatDateTime(o.created_at);
+                  return (
+                    <tr key={o.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-gray-500 text-xs">#{o.id}</td>
+                      <td className="px-4 py-3 text-gray-900 font-medium">{o.quantity_requested} MT</td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">
+                        {parseFloat(o.total_invoice).toLocaleString("en-PK", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-gray-700 text-xs">{date}</p>
+                        <p className="text-gray-400 text-xs">{time}</p>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-
-          {/* Table rows */}
-          <div className="divide-y divide-slate-800/60">
-            {filtered.map((order, i) => (
-              <div
-                key={order.id}
-                className="grid grid-cols-2 sm:grid-cols-5 gap-4 px-5 py-4 hover:bg-slate-800/30 transition-colors items-center"
-              >
-                {/* Order ID */}
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-                    #{order.id}
-                  </div>
-                </div>
-
-                {/* Listing */}
-                <div>
-                  <p className="text-slate-300 text-sm font-medium">
-                    Listing #{order.listing}
-                  </p>
-                  <p className="text-slate-600 text-xs sm:hidden">
-                    {order.quantity_requested} MT
-                  </p>
-                </div>
-
-                {/* Qty */}
-                <div className="hidden sm:block">
-                  <Badge color="teal">{order.quantity_requested} MT</Badge>
-                </div>
-
-                {/* Invoice */}
-                <div>
-                  <p className="text-cyan-400 font-bold text-sm">
-                    {parseFloat(order.total_invoice).toLocaleString("en-PK", { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-
-                {/* Date */}
-                <div className="text-slate-500 text-xs">
-                  {new Date(order.created_at).toLocaleDateString("en-PK", {
-                    year: "numeric", month: "short", day: "numeric"
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
