@@ -20,8 +20,8 @@ export default function Navbar({ activePage, setActivePage }) {
             onClick={() => setActivePage("home")}
             className="flex items-center gap-2 font-bold text-gray-900 text-base hover:text-blue-700 transition-colors"
           >
-            <span className="bg-blue-700 text-white text-xs font-bold px-2 py-0.5 rounded">CF</span>
-            ChemFlow
+            <span className="bg-blue-700 text-white text-xs font-bold px-2 py-0.5 rounded">CS</span>
+            ChemSource
           </button>
 
           {/* Desktop nav */}
