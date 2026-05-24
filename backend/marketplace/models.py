@@ -8,7 +8,7 @@ class CustomUser(AbstractUser):
         ("DISTRIBUTOR", "Distributor"),
         ("MANUFACTURER", "Manufacturer")
     )
-    SHOP_NAME = models.CharField(max_length=255, unique=True, null=False, blank=False)
+    SHOP_NAME = models.CharField(max_length=255, unique=True, null=True, blank=True)
     PHONE = models.CharField(max_length=13, unique=True, null=True, blank=True)
     CATEGORY = models.CharField(max_length=50, choices=CATEGORIES)
 
@@ -44,7 +44,7 @@ class PriceListing(models.Model):
         return f"{(self.DISTRIBUTOR.SHOP_NAME)} - {self.CHEMICAL_NAME}"
     
 class ProcurementOrder(models.Model):
-    MANUFACTURER = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
+    ProcurementOrder = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
     listing = models.ForeignKey(PriceListing, on_delete=models.CASCADE, related_name='orders')
     quantity_requested = models.PositiveIntegerField()
     total_invoice = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
