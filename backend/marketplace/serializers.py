@@ -14,7 +14,7 @@ class PriceListingSerializer(serializers.ModelSerializer):
         fields = ['id', 'DISTRIBUTOR', 'PRODUCT', 'price_per_metric_ton', 'quantity_available_mt', 'created_at', 'updated_at', 'is_available']  
 
     def get_DISTRIBUTOR(self, obj):
-        return obj.DISTRIBUTOR.shop_name or obj.DISTRIBUTOR.username  
+        return obj.DISTRIBUTOR.SHOP_NAME or obj.DISTRIBUTOR.username  
 
 class ProcurementOrderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,7 +22,7 @@ class ProcurementOrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'MANUFACTURER', 'listing', 'quantity_requested', 'total_invoice', 'created_at']  
 
     def get_MANUFACTURER(self, obj):
-        return obj.MANUFACTURER.shop_name or obj.MANUFACTURER.username  
+        return obj.MANUFACTURER.SHOP_NAME or obj.MANUFACTURER.username  
 
     def validate(self, data):
         requested_amount = data.get('quantity_requested')
