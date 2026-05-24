@@ -30,26 +30,35 @@ class ProductListing(models.Model):
         return f"{self.CAS_NUMBER} - {self.CHEMICAL_NAME}"
     
 class PriceListing(models.Model):
-    DISTRIBUTOR = models.ForeignKey(CustomUser, limit_choices_to={'role':'DISTRIBUTOR'})
-    CHEMICAL_NAME = models.ForeignKey(ProductListing)
+    DISTRIBUTOR = models.ForeignKey(CustomUser, limit_choices_to={'role':'DISTRIBUTOR'}, on_delete=models.CASCADE, related_name='listings')
+    PRODUCT = models.ForeignKey(ProductListing, on_delete=models.CASCADE, related_name='listings')
     price_per_metric_ton = models.DecimalField(max_digits=10, decimal_places=2)
     quantity_available_mt = models.PositiveIntegerField()
-    created_at = models.DateTimeField(auto_now=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('DISTRIBUTOR', 'PRODUCT')
 
     def __str__(self):
         return f"{(self.DISTRIBUTOR.SHOP_NAME)} - {self.CHEMICAL_NAME}"
     
 class ProcurementOrder(models.Model):
-    MANUFACTURER = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'})
-    listing = models.ForeignKey(PriceListing)
-    created_at = models.DateTimeField(auto_now=True)
+    MANUFACTURER = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
+    listing = models.ForeignKey(PriceListing, on_delete=models.CASCADE, related_name='orders')
     quantity_requested = models.PositiveIntegerField()
-    total_invoice = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now=True)
+    total_invoice = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        
+        listing_obj = self.listing
+        
+        self.total_invoice = listing_obj.price_per_metric_ton * self.quantity_requested
+        if self.pk is None:
+            listing_obj.quantity_available_mt -= self.quantity_requested
+            listing_obj.save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{(self.MANUFACTURER.SHOP_NAME)} - {self.listing.CHEMICAL_NAME} @ {self.listing.price_per_metric_ton} PKR/MT"
-    
-    def save(self):
-        total_invoice = self.quantity_requested * self.listing.price_per_metric_ton
