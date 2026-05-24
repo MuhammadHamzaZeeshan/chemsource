@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { fetchListings, createOrder } from "../api";
-import { LoadingSpinner, ErrorBanner, EmptyState, Badge } from "../components/UI";
+import { LoadingSpinner, ErrorBanner, EmptyState, Badge, PageHeader } from "../components/UI";
 
 const CATEGORY_META = {
-  TEXTILE_AUXILIARY: { label: "Textile Aux", color: "cyan" },
-  PHARMA_GRADE:      { label: "Pharma",      color: "emerald" },
-  SOLVENT:           { label: "Solvent",     color: "teal" },
-  ACID_BASE:         { label: "Acid/Base",   color: "amber" },
+  TEXTILE_AUXILIARY: { label: "Textile Aux", color: "blue" },
+  PHARMA_GRADE:      { label: "Pharma",      color: "green" },
+  SOLVENT:           { label: "Solvent",     color: "yellow" },
+  ACID_BASE:         { label: "Acid/Base",   color: "red" },
 };
 
 function OrderModal({ listing, onClose, onSuccess }) {
-  const [qty, setQty] = useState(1);
+  const [qty, setQty]               = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]           = useState(null);
 
-  const totalInvoice = (qty * parseFloat(listing.price_per_metric_ton)).toFixed(2);
+  const total = (qty * parseFloat(listing.price_per_metric_ton)).toFixed(2);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -31,41 +31,37 @@ function OrderModal({ listing, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-white border border-gray-200 rounded-lg shadow-lg">
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <div>
-            <h2 className="text-white font-bold text-lg">Place Order</h2>
-            <p className="text-slate-400 text-xs mt-0.5">{listing.PRODUCT?.CHEMICAL_NAME}</p>
+            <h2 className="font-semibold text-gray-900">Place Order</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{listing.PRODUCT?.CHEMICAL_NAME}</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4">
-          {/* Listing summary */}
-          <div className="rounded-xl bg-slate-800/60 border border-slate-700 p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Distributor</span>
-              <span className="text-white font-medium">{listing.DISTRIBUTOR}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Price / MT</span>
-              <span className="text-cyan-400 font-bold">PKR {listing.price_per_metric_ton}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Available Stock</span>
-              <span className="text-emerald-400 font-semibold">{listing.quantity_available_mt} MT</span>
-            </div>
-          </div>
+        <div className="px-5 py-5 space-y-4">
+          <table className="w-full text-sm border border-gray-200 rounded">
+            <tbody className="divide-y divide-gray-100">
+              <tr className="bg-gray-50">
+                <td className="px-3 py-2 text-gray-500 text-xs font-medium w-1/2">Distributor</td>
+                <td className="px-3 py-2 text-gray-900 font-medium">{listing.DISTRIBUTOR}</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 text-gray-500 text-xs font-medium">Price / MT</td>
+                <td className="px-3 py-2 text-gray-900 font-semibold">PKR {listing.price_per_metric_ton}</td>
+              </tr>
+              <tr className="bg-gray-50">
+                <td className="px-3 py-2 text-gray-500 text-xs font-medium">Available Stock</td>
+                <td className="px-3 py-2 text-gray-900">{listing.quantity_available_mt} MT</td>
+              </tr>
+            </tbody>
+          </table>
 
-          {/* Quantity input */}
           <div>
-            <label className="block text-sm text-slate-300 font-medium mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Quantity (Metric Tons)
             </label>
             <input
@@ -74,36 +70,32 @@ function OrderModal({ listing, onClose, onSuccess }) {
               max={listing.quantity_available_mt}
               value={qty}
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
-            <p className="text-xs text-slate-500 mt-1">Max: {listing.quantity_available_mt} MT</p>
+            <p className="text-xs text-gray-400 mt-1">Maximum: {listing.quantity_available_mt} MT</p>
           </div>
 
-          {/* Invoice Preview */}
-          <div className="rounded-xl bg-cyan-500/5 border border-cyan-500/20 p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-300 text-sm font-medium">Estimated Invoice</span>
-              <span className="text-cyan-400 text-xl font-black">PKR {totalInvoice}</span>
-            </div>
+          <div className="flex items-center justify-between px-3 py-3 bg-blue-50 border border-blue-200 rounded">
+            <span className="text-sm font-medium text-gray-700">Estimated Invoice</span>
+            <span className="text-base font-bold text-blue-700">PKR {parseFloat(total).toLocaleString()}</span>
           </div>
 
           {error && <ErrorBanner message={error} />}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 flex gap-3">
+        <div className="px-5 py-4 border-t border-gray-200 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-800 transition-colors"
+            className="flex-1 py-2 border border-gray-300 rounded text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={submitting || qty > listing.quantity_available_mt}
-            className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-2 bg-blue-700 text-white rounded text-sm font-semibold hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "Processing…" : "Confirm Order"}
+            {submitting ? "Processing..." : "Confirm Order"}
           </button>
         </div>
       </div>
@@ -113,12 +105,14 @@ function OrderModal({ listing, onClose, onSuccess }) {
 
 export default function ListingsPage() {
   const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const [selectedListing, setSelectedListing] = useState(null);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [sortBy, setSortBy] = useState("default");
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
+  const [search, setSearch]     = useState("");
+  const [sortBy, setSortBy]     = useState("default");
+  const [catFilter, setCatFilter] = useState("ALL");
+  const [distFilter, setDistFilter] = useState("ALL");
+  const [selected, setSelected] = useState(null);
+  const [success, setSuccess]   = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -130,145 +124,147 @@ export default function ListingsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handleOrderSuccess = () => {
-    setSelectedListing(null);
-    setOrderSuccess(true);
+  const handleSuccess = () => {
+    setSelected(null);
+    setSuccess(true);
     load();
-    setTimeout(() => setOrderSuccess(false), 3000);
+    setTimeout(() => setSuccess(false), 3000);
   };
 
-  let filtered = listings.filter((l) =>
-    l.PRODUCT?.CHEMICAL_NAME?.toLowerCase().includes(search.toLowerCase()) ||
-    l.DISTRIBUTOR?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Unique distributors and categories from data
+  const distributors = ["ALL", ...Array.from(new Set(listings.map((l) => l.DISTRIBUTOR).filter(Boolean)))];
+  const categories   = ["ALL", ...Object.keys(CATEGORY_META)];
 
-  if (sortBy === "price_asc") filtered = [...filtered].sort((a, b) => parseFloat(a.price_per_metric_ton) - parseFloat(b.price_per_metric_ton));
-  if (sortBy === "price_desc") filtered = [...filtered].sort((a, b) => parseFloat(b.price_per_metric_ton) - parseFloat(a.price_per_metric_ton));
-  if (sortBy === "stock_desc") filtered = [...filtered].sort((a, b) => b.quantity_available_mt - a.quantity_available_mt);
+  let filtered = listings.filter((l) => {
+    const q = search.toLowerCase();
+    const matchSearch = l.PRODUCT?.CHEMICAL_NAME?.toLowerCase().includes(q) || l.DISTRIBUTOR?.toLowerCase().includes(q);
+    const matchCat    = catFilter === "ALL" || l.PRODUCT?.CATEGORY === catFilter;
+    const matchDist   = distFilter === "ALL" || l.DISTRIBUTOR === distFilter;
+    return matchSearch && matchCat && matchDist;
+  });
+
+  if (sortBy === "price_asc")   filtered = [...filtered].sort((a, b) => parseFloat(a.price_per_metric_ton) - parseFloat(b.price_per_metric_ton));
+  if (sortBy === "price_desc")  filtered = [...filtered].sort((a, b) => parseFloat(b.price_per_metric_ton) - parseFloat(a.price_per_metric_ton));
+  if (sortBy === "stock_desc")  filtered = [...filtered].sort((a, b) => b.quantity_available_mt - a.quantity_available_mt);
+  if (sortBy === "name_asc")    filtered = [...filtered].sort((a, b) => (a.PRODUCT?.CHEMICAL_NAME || "").localeCompare(b.PRODUCT?.CHEMICAL_NAME || ""));
+  if (sortBy === "dist_asc")    filtered = [...filtered].sort((a, b) => (a.DISTRIBUTOR || "").localeCompare(b.DISTRIBUTOR || ""));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-teal-400 text-sm font-medium mb-2">
-          <span>◉</span> Market Listings
-        </div>
-        <h1 className="text-3xl font-black text-white mb-1">Price Listings</h1>
-        <p className="text-slate-400 text-sm">
-          Live pricing from verified distributors. All prices in PKR per metric ton.
-        </p>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <PageHeader
+        label="Market"
+        title="Price Listings"
+        desc="Live pricing from verified distributors. All prices in PKR per metric ton."
+      />
 
-      {/* Success toast */}
-      {orderSuccess && (
-        <div className="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium">
-          <span>✓</span> Order placed successfully!
+      {success && (
+        <div className="mb-5 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded font-medium">
+          ✓ Order placed successfully.
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">⌕</span>
-          <input
-            type="text"
-            placeholder="Search by chemical or distributor…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-teal-500 transition-colors"
-          />
-        </div>
+      {/* Filters row */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
+        <input
+          type="text"
+          placeholder="Search chemical or distributor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-48 px-3 py-2 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        />
+        <select
+          value={catFilter}
+          onChange={(e) => setCatFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-500 bg-white"
+        >
+          {categories.map((c) => (
+            <option key={c} value={c}>{c === "ALL" ? "All Categories" : CATEGORY_META[c]?.label}</option>
+          ))}
+        </select>
+        <select
+          value={distFilter}
+          onChange={(e) => setDistFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-500 bg-white"
+        >
+          {distributors.map((d) => (
+            <option key={d} value={d}>{d === "ALL" ? "All Distributors" : d}</option>
+          ))}
+        </select>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-sm focus:outline-none focus:border-teal-500 transition-colors"
+          className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-500 bg-white"
         >
           <option value="default">Sort: Default</option>
-          <option value="price_asc">Price: Low → High</option>
-          <option value="price_desc">Price: High → Low</option>
+          <option value="name_asc">Chemical Name: A–Z</option>
+          <option value="dist_asc">Distributor: A–Z</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
           <option value="stock_desc">Stock: Most Available</option>
         </select>
       </div>
 
-      {loading && <LoadingSpinner message="Fetching live listings…" />}
-      {error && <ErrorBanner message={error} />}
+      {loading && <LoadingSpinner message="Loading listings..." />}
+      {error   && <ErrorBanner message={error} />}
       {!loading && !error && filtered.length === 0 && (
-        <EmptyState icon="◉" title="No listings available" desc="Check back later or adjust your search." />
+        <EmptyState title="No listings available" desc="Try adjusting your filters or search." />
       )}
 
       {!loading && !error && filtered.length > 0 && (
         <>
-          <p className="text-xs text-slate-500 mb-4">{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filtered.map((listing) => {
-              const catMeta = CATEGORY_META[listing.PRODUCT?.CATEGORY] || { label: listing.PRODUCT?.CATEGORY, color: "slate" };
-              return (
-                <div
-                  key={listing.id}
-                  className="group rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-teal-500/30 hover:bg-slate-800/50 p-5 transition-all duration-200"
-                >
-                  {/* Top row */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-bold text-base truncate group-hover:text-teal-100 transition-colors">
-                        {listing.PRODUCT?.CHEMICAL_NAME || "—"}
-                      </h3>
-                      <p className="text-slate-500 text-xs font-mono mt-0.5">
-                        CAS: {listing.PRODUCT?.CAS_NUMBER || "—"}
-                      </p>
-                    </div>
-                    <Badge color={catMeta.color}>{catMeta.label}</Badge>
-                  </div>
-
-                  {/* Distributor */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border border-teal-500/20 flex items-center justify-center text-xs text-teal-400 font-bold">
-                      {listing.DISTRIBUTOR?.[0]?.toUpperCase() || "?"}
-                    </div>
-                    <span className="text-slate-400 text-sm">{listing.DISTRIBUTOR}</span>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="rounded-xl bg-slate-800/60 p-3">
-                      <p className="text-slate-500 text-xs mb-1">Price / MT</p>
-                      <p className="text-cyan-400 font-black text-lg leading-none">
-                        PKR {parseFloat(listing.price_per_metric_ton).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-slate-800/60 p-3">
-                      <p className="text-slate-500 text-xs mb-1">Available Stock</p>
-                      <p className="text-emerald-400 font-black text-lg leading-none">
-                        {listing.quantity_available_mt} <span className="text-xs font-normal text-emerald-500">MT</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Updated */}
-                  <div className="flex items-center justify-between">
-                    <p className="text-slate-600 text-xs">
-                      Updated: {new Date(listing.updated_at).toLocaleDateString()}
-                    </p>
-                    <button
-                      onClick={() => setSelectedListing(listing)}
-                      className="px-4 py-2 rounded-lg bg-teal-500/15 text-teal-400 text-xs font-semibold border border-teal-500/20 hover:bg-teal-500/25 hover:border-teal-400/30 transition-all"
-                    >
-                      Order Now →
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+          <p className="text-xs text-gray-400 mb-3">{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</p>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Chemical</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Distributor</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Price / MT</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Stock (MT)</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Updated</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((l) => {
+                  const meta = CATEGORY_META[l.PRODUCT?.CATEGORY] || { label: l.PRODUCT?.CATEGORY, color: "gray" };
+                  return (
+                    <tr key={l.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-gray-900">{l.PRODUCT?.CHEMICAL_NAME || "—"}</p>
+                        <p className="text-xs text-gray-400 font-mono">{l.PRODUCT?.CAS_NUMBER}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge color={meta.color}>{meta.label}</Badge>
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{l.DISTRIBUTOR}</td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">
+                        PKR {parseFloat(l.price_per_metric_ton).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{l.quantity_available_mt}</td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">
+                        {new Date(l.updated_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => setSelected(l)}
+                          className="px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-300 rounded hover:bg-blue-50 transition-colors whitespace-nowrap"
+                        >
+                          Order
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </>
       )}
 
-      {selectedListing && (
-        <OrderModal
-          listing={selectedListing}
-          onClose={() => setSelectedListing(null)}
-          onSuccess={handleOrderSuccess}
-        />
+      {selected && (
+        <OrderModal listing={selected} onClose={() => setSelected(null)} onSuccess={handleSuccess} />
       )}
     </div>
   );
