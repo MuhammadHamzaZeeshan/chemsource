@@ -1,26 +1,22 @@
 const FEATURES = [
   {
     title: "Product Catalog",
-    desc: "Browse all registered industrial chemicals by name, CAS number, and category.",
+    desc: "Browse all registered industrial chemicals by name, CAS number, and category classification.",
     page: "products",
+    stat: "Products",
   },
   {
     title: "Price Listings",
-    desc: "View live pricing from verified distributors. Filter, sort, and place orders directly.",
+    desc: "View live pricing from verified distributors. Filter, sort, and place procurement orders directly.",
     page: "listings",
+    stat: "Live Listings",
   },
   {
     title: "Procurement Orders",
-    desc: "Track all placed orders, quantities requested, and auto-calculated invoices.",
+    desc: "Track all placed orders, quantities requested, and auto-calculated invoices in one place.",
     page: "orders",
+    stat: "Orders",
   },
-];
-
-const CATEGORIES = [
-  { name: "Textile Auxiliary", tag: "TEXTILE_AUXILIARY" },
-  { name: "Pharma Grade",      tag: "PHARMA_GRADE" },
-  { name: "Solvents",          tag: "SOLVENT" },
-  { name: "Acids & Bases",     tag: "ACID_BASE" },
 ];
 
 export default function HomePage({ setActivePage }) {
@@ -35,7 +31,7 @@ export default function HomePage({ setActivePage }) {
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
           Manage Chemical Supply<br className="hidden sm:block" /> Chain Operations
         </h1>
-        <p className="text-gray-500 text-base max-w-xl mb-6">
+        <p className="text-gray-500 text-base max-w-xl mb-7">
           A centralised platform for manufacturers and distributors to manage product listings,
           compare prices, and process procurement orders efficiently.
         </p>
@@ -55,41 +51,28 @@ export default function HomePage({ setActivePage }) {
         </div>
       </div>
 
-      {/* Features */}
-      <div className="mb-12">
-        <h2 className="text-base font-semibold text-gray-700 mb-5">Platform Modules</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Feature cards */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5">Platform Modules</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {FEATURES.map((f) => (
             <button
               key={f.title}
               onClick={() => setActivePage(f.page)}
-              className="text-left p-5 border border-gray-200 rounded hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+              className="text-left p-6 border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all group bg-white"
             >
-              <h3 className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
+              <h3 className="text-base font-semibold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
                 {f.title}
               </h3>
-              <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
+              <p className="text-sm text-gray-500 leading-relaxed mb-5">{f.desc}</p>
+              <span className="text-xs font-semibold text-blue-600 group-hover:underline">
+                Go to {f.title} →
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Categories */}
-      <div>
-        <h2 className="text-base font-semibold text-gray-700 mb-5">Chemical Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {CATEGORIES.map((cat) => (
-            <div
-              key={cat.tag}
-              onClick={() => setActivePage("products")}
-              className="p-4 border border-gray-200 rounded text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
-            >
-              <p className="text-sm font-medium text-gray-800">{cat.name}</p>
-              <p className="text-xs text-gray-400 font-mono mt-1">{cat.tag}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
