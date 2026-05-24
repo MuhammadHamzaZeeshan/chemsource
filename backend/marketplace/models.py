@@ -45,7 +45,7 @@ class PriceListing(models.Model):
         return f"{self.DISTRIBUTOR.SHOP_NAME} - {self.PRODUCT.CHEMICAL_NAME}"
     
 class ProcurementOrder(models.Model):
-    ProcurementOrder = models.ForeignKey(CustomUser, limit_choices_to={'role':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
+    MANUFACTURER = models.ForeignKey(CustomUser, limit_choices_to={'CATEGORY':'MANUFACTURER'}, on_delete=models.CASCADE, related_name='orders')
     listing = models.ForeignKey(PriceListing, on_delete=models.CASCADE, related_name='orders')
     quantity_requested = models.PositiveIntegerField()
     total_invoice = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
