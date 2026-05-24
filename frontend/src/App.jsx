@@ -11,16 +11,16 @@ export default function App() {
 
   const renderPage = () => {
     switch (activePage) {
-      case "home": return <HomePage setActivePage={setActivePage} />;
+      case "home":     return <HomePage setActivePage={setActivePage} />;
       case "products": return <ProductsPage />;
       case "listings": return <ListingsPage />;
-      case "orders": return <OrdersPage />;
-      default: return <HomePage setActivePage={setActivePage} />;
+      case "orders":   return <OrdersPage />;
+      default:         return <HomePage setActivePage={setActivePage} />;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
+    <div className="min-h-screen flex flex-col bg-white text-gray-900">
       <Navbar activePage={activePage} setActivePage={setActivePage} />
       <main className="flex-1">
         {renderPage()}
